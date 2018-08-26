@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+		"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+		"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.password">root</property>
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/elsilio?serverTimezone=UTC</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+		<property name="hbm2ddl.auto">update</property>
+		<property name="show_sql">true</property>
+		<mapping class="org.eclipse.model.Cours"/>
+		<mapping class="org.eclipse.model.Evaluation"/>
+		<mapping class="org.eclipse.model.Formation"/>
+		<mapping class="org.eclipse.model.Groupe"/>
+		<mapping class="org.eclipse.model.Matiere"/>
+		<mapping class="org.eclipse.model.Qcm"/>
+		<mapping class="org.eclipse.model.Question"/>
+		<mapping class="org.eclipse.model.Reponse"/>
+		<mapping class="org.eclipse.model.User"/>
+		<mapping class="org.eclipse.model.UserQcm"/>
+		<mapping class="org.eclipse.model.UserQcmPK"/>
+		<mapping class="org.eclipse.model.Commentaire"/>
+		<mapping class="org.eclipse.model.CommentairePK"/>
+	</session-factory>
+</hibernate-configuration>
