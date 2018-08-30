@@ -1,7 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:jsp="http://java.sun.com/xml/ns/javaee/jsp" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
   <display-name>Projet Fil Rouge</display-name>
-   <!--  <servlet>
+  <!--  <servlet>
+  	<description>
+  	</description>
+  	<display-name>DisplayPDFCoursServlet</display-name>
+  	<servlet-name>DisplayPDFCoursServlet</servlet-name>
+  	<servlet-class>org.eclipse.controller.cours.DisplayPDFCoursServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>LinkUserToGroupe</display-name>
+  	<servlet-name>LinkUserToGroupe</servlet-name>
+  	<servlet-class>org.eclipse.controller.groupe.LinkUserToGroupe</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>DisplayPDFCoursServlet</servlet-name>
+  	<url-pattern>/DisplayPDFCoursServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>LinkUserToGroupe</servlet-name>
+  	<url-pattern>/LinkUserToGroupe</url-pattern>
+  </servlet-mapping>
+   <servlet>
   	<description>
   	</description>
   	<display-name>LogoutServlet</display-name>

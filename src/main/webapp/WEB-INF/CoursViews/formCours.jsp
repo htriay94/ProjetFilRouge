@@ -16,10 +16,9 @@
 
 			<!-- Page Content -->
 			<div class="card mb-3">
-				<div class="card-header"><h3><i class="fas fa-fw fa-book"></i>${param.nomMat} : ${ type } un cours</h3></div>
+				<div class="card-header"><h3><i class="fas fa-fw fa-book"></i>${ sessionScope.cours.matiere.nomMatiere }${ param.nomMat } / ${ type } un cours : ${ sessionScope.cours.nomCours }</h3></div>
 	        <div class="card-body">
-	          <form method="post" action=${ action }>
-	          <input type="hidden" name="idMat" id="idMat" value="${ param.idMat }">
+	          <form method="post" action=${ action } enctype="multipart/form-data">
 	            <div class="form-group">
 	                  <div class="form-label-group">
 		                <input type="text" id="nom" name="nom" class="form-control" placeholder="Nom" value="${ sessionScope.cours.nomCours }${ newNom }" required="required">
@@ -28,13 +27,30 @@
 	            </div>
 	            <div class="form-group">
 	                  <div class="form-label-group">
-		                <input type="file" id="support" name="support" class="form-control" placeholder="Support">
-		                <label for="support">Support</label>
+		                <input type="${ date }" id="dateCours" name="dateCours" class="form-control" value="<fmt:formatDate pattern="yyyy-MM-dd"
+												value="${sessionScope.cours.dateCours}"/>" placeholder="Date" required="required">
+		                <label for="dateCours">Date</label>
 		              </div>
 	            </div>
+	            <div class="form-group">
+	            	<label for="idGroupe">Groupe</label>
+                  	<select name="idGroupe" class="form-control" id="idGroupe">
+	                  	<c:forEach items="${ groupes }" var="groupe" varStatus="status">
+	                  		<option value="${ groupe.idGroupe }">${ groupe.nomGroupe }</option>
+	                  	</c:forEach>
+                  	</select>
+	            </div>
+	            <c:if test="${ action != 'edit-cours' }">
+	            <div class="input-group mb-3">
+				  <div class="custom-file">
+				    <input type="file" class="file" id="support" name="support" aria-describedby="support">
+				    <label class="custom-file-label" for="support">Support</label>
+				  </div>
+				</div>
+				</c:if>
 	            <p style="color: red;">${ inputError }</p>
 	            <p style="color: red;">${ nomIncorrect }</p>
-	            <button class="btn btn-primary btn-block" type="submit" name="submit" id="submit">${ type }</button>
+	            <button class="btn btn-primary" type="submit" name="submit" id="submit">${ type }</button>
 	          </form>
 	        </div>
 			</div>

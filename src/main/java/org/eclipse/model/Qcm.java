@@ -31,7 +31,7 @@ public class Qcm implements Serializable {
 	private Cours cours;
 
 	//bi-directional many-to-one association to Question
-	@OneToMany(targetEntity=Question.class, mappedBy="qcm")
+	@OneToMany(targetEntity=Question.class, mappedBy="qcm",cascade=CascadeType.ALL)
 	@ElementCollection
 	private List<Question> questions;
 	

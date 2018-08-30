@@ -2,9 +2,6 @@ package org.eclipse.controller.matiere;
 
 import java.io.IOException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.model.Matiere;
+import org.eclipse.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -21,7 +19,7 @@ import org.hibernate.cfg.Configuration;
 /**
  * Servlet implementation class AddMatiereServlet
  */
-@WebServlet("/addMatiere")
+@WebServlet("/add-matiere")
 public class AddMatiereServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
@@ -41,7 +39,17 @@ public class AddMatiereServlet extends HttpServlet {
 		if(session.getAttribute("connected") == null)
 			this.getServletContext().getRequestDispatcher("/WEB-INF/Authentification/formAuth.jsp").forward(request, response);
     	else {
-    		
+    		/*--- Verification des droits ----*/
+    		User user_auth = (User) session.getAttribute("user_auth");
+    		if(user_auth.getStatut().equals("admin")) {
+    			request.setAttribute("type","Créer");
+    			//request.setAttribute("id",id);
+        		request.setAttribute("action","add-matiere");
+        		this.getServletContext().getRequestDispatcher("/WEB-INF/MatiereViews/formMatiere.jsp").forward(request, response);
+    		} else {
+    			session.setAttribute("AlertErrorMsg", "Vous n'êtes pas autorisé(e) à faire cette action !");
+    			response.sendRedirect("home");
+    		}
     	}
 	}
 
@@ -50,15 +58,58 @@ public class AddMatiereServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		Matiere matiere = new Matiere();
-		matiere.setNomMatiere("JEE");
-//		Configuration configuration = new Configuration().configure().addAnnotatedClass(Matiere.class);
-//		SessionFactory sFactory = configuration.buildSessionFactory();
-//		Session session = sFactory.openSession();
-//		Transaction tx = session.beginTransaction();
-//		session.save(matiere); // on peut aussi utiliser persist
-//		tx.commit();
-		doGet(request, response);
+		Boolean error = false;
+		HttpSession session = request.getSession();
+		/*----- Preparation de la connexion -----*/
+		Configuration configuration = new Configuration().configure();
+		SessionFactory sFactory = configuration.buildSessionFactory();
+		Session sessionFact = sFactory.openSession();
+		Transaction tx = sessionFact.beginTransaction();
+		
+		/*----- Recupération des inputs -----*/
+		String nom = request.getParameter("nom");
+		
+		System.out.println(nom + " / ");
+		
+		/*----- Test confirmité des mots de passe -----*/
+		if(nom==null) {
+			request.setAttribute("inputError", "Veuillez remplir le champs nom");
+			doGet(request, response);
+		} else {
+			/*----- Validation du formulaire -----*/
+			try {
+				verifChaine(nom);
+			} catch (Exception e) {
+				request.setAttribute("nomIncorrect", "Le nom" + e.getMessage() );
+				error = true;
+			} 
+			if(error) {
+				/*----- Recuperation des inputs en cas d'erreur + redirection-----*/
+				request.setAttribute("newNom", nom);
+				System.out.println("Error add matière");
+				doGet(request, response);
+			} else {	
+				Matiere matiere = new Matiere();
+				matiere.setNomMatiere(nom);
+				sessionFact.save(matiere);
+				tx.commit();
+				/*----- Fermeture connexion + Redirection -----*/
+				sessionFact.close();
+				sFactory.close();
+				session.setAttribute("AlertSuccessMsg", "Matière bien enregistrée");
+				response.sendRedirect("home");
+				
+			}
+		}
 	}
+	public boolean verifChaine(String s) throws Exception {
+		char c = s.charAt(0);
+		if (s.length() < 2)
+			throw new Exception(" doit comporter au moins deux caracteres");
+		if(!(c >= 'A' && c <= 'Z'))
+			throw new Exception(" chaine doit commencer par une lettre en majuscule");
+		return true;
+	}
+	
 
 }

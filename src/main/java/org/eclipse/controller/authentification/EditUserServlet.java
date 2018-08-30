@@ -56,7 +56,7 @@ public class EditUserServlet extends HttpServlet {
 		Session sessionFact = sFactory.openSession();
 		Transaction tx = sessionFact.beginTransaction();
 		HttpSession session = request.getSession();
-		
+		User user_auth = (User) session.getAttribute("user_auth");
 		/*----- Recupération des inputs -----*/
 		String nom = request.getParameter("nom");
 		String prenom = request.getParameter("prenom");
@@ -64,7 +64,9 @@ public class EditUserServlet extends HttpServlet {
 		String confirmMdp = request.getParameter("confirmMdp");
 		String email = request.getParameter("email");
 		String tel = request.getParameter("tel");
-		String statut = request.getParameter("statut");
+		String statut = null;
+		if(!user_auth.getStatut().equals("admin"))
+			statut = request.getParameter("statut");
 		Boolean error = false;
 		System.out.println(" / " + mdp + " / " + confirmMdp + " / " + nom + " / " + prenom + " / " + email + " / " + tel);
 
@@ -91,6 +93,12 @@ public class EditUserServlet extends HttpServlet {
 			request.setAttribute("prenomIncorrect", "Le prénom" + e.getMessage() );
 			error = true;
 		}
+		try {
+			veriftel(tel);
+		} catch (Exception e) {
+			request.setAttribute("telIncorrect", e.getMessage() );
+			error = true;
+		}
 		if(error) {
 			/*----- Recuperation des inputs en cas d'erreur + redirection-----*/
 			request.setAttribute("newNom", nom);
@@ -100,18 +108,20 @@ public class EditUserServlet extends HttpServlet {
 			System.out.println("Error register");
 			doGet(request, response);
 		} else {
-			User user_auth = (User) session.getAttribute("user_auth");
+			
 			user_auth.setMotDePasse(mdp);
 			user_auth.setNomUser(nom);
 			user_auth.setPrenomUser(prenom);
 			user_auth.setTelephone(tel);
 			user_auth.setEmail(email);
-			user_auth.setStatut(statut);
+			if(!user_auth.getStatut().equals("admin"))
+				user_auth.setStatut(statut);
 			
 			session.setAttribute("msgMenu", "Bienvenue "+ user_auth.getPrenomUser() + " " + user_auth.getNomUser());
+			session.removeAttribute("user_auth");
 			session.setAttribute("user_auth",user_auth);
 			
-			sessionFact.flush();
+			sessionFact.merge(user_auth);
 			tx.commit();
 			session.setAttribute("AlertSuccessMsg", "Les modifications ont été prises en compte");
 			response.sendRedirect("home");
@@ -122,14 +132,20 @@ public class EditUserServlet extends HttpServlet {
 	public boolean verifChaine(String s) throws Exception {
 		char c = s.charAt(0);
 		if (s.length() < 2)
-			throw new Exception("La chaine doit comporter au moins deux caracteres");
+			throw new Exception(" doit comporter au moins deux caracteres");
 		if(!(c >= 'A' && c <= 'Z'))
-			throw new Exception("La chaine doit commencer par une lettre en majuscule");
+			throw new Exception(" doit commencer par une lettre en majuscule");
 		for(int i = 0 ; i< s.length(); i++) {
 			c = s.charAt(i);
 			if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && (c != '-') && !Character.isWhitespace(c))
-				throw new Exception("La chaine ne peut contenir que des lettres, tirés et espaces");
+				throw new Exception(" ne peut contenir que des lettres, tirés et espaces");
 		}
+		return true;
+	}
+	public boolean veriftel(String s) throws Exception {
+		char c = s.charAt(0);
+		if (s.length() != 10)
+			throw new Exception("Le téléphone doit contenir exactement 10 nombres");
 		return true;
 	}
 }

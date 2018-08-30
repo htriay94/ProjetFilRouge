@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.model.Commentaire;
 import org.eclipse.model.Cours;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -41,26 +42,22 @@ public class ShowCoursServlet extends HttpServlet {
 			/*----- Redirection vers la vue de login -----*/
 			this.getServletContext().getRequestDispatcher("/WEB-INF/Authentification/formAuth.jsp").forward(request, response);
     	else {
-    		/*----- Recuperation de l'id de la matiere et de son nom -----*/
-    		int idMatiere = Integer.parseInt(request.getParameter("id"));
-    		String nomMatiere = request.getParameter("nom");
+    		
     		/*----- Configuration connexion db -----*/
     		Configuration configuration = new Configuration().configure();
     		SessionFactory sFactory = configuration.buildSessionFactory();
     		Session sessionFact = sFactory.openSession();
-    		/*----- Requête db liste cours d'une matiere -----*/
-    		Query query = sessionFact.createNamedQuery("Cours.findByIdMatiere");
-    		query.setParameter("idMatiere", idMatiere);
-    		List<Cours> cours = (List<Cours>) query.getResultList();
+    		/*----- Requête db cours -----*/
+    		Cours cours = (Cours) sessionFact.get(Cours.class, Integer.parseInt(request.getParameter("idC")));
     		
     		/*----- Fermeture connexion db -----*/
     		sessionFact.close();
     		sFactory.close();
     		
+    		session.removeAttribute("cours");
+    		
     		/*----- Préparation des variables ------*/
-    		request.setAttribute("nomMatiere", nomMatiere);
-    		request.setAttribute("idMatiere", idMatiere);
-    		request.setAttribute("listeCours",cours);
+    		session.setAttribute("cours",cours);
     		
     		/*----- Redirection vers la vue -----*/
     		this.getServletContext().getRequestDispatcher("/WEB-INF/CoursViews/showCours.jsp").forward(request, response);

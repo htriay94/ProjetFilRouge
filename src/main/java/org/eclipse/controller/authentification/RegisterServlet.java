@@ -1,6 +1,7 @@
 package org.eclipse.controller.authentification;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.persistence.Query;
 import javax.servlet.ServletException;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.model.Groupe;
 import org.eclipse.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -36,7 +38,16 @@ public class RegisterServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		/*----- Preparation de la connexion pour charger les groupes de formation + perparation des variables + renvoie vers vue formUser -----*/
+		Configuration configuration = new Configuration().configure();
+		SessionFactory sFactory = configuration.buildSessionFactory();
+		Session sessionFact = sFactory.openSession();
 		HttpSession session = request.getSession();
+		
+		Query query = sessionFact.createNamedQuery("Groupe.findAll");
+		List<Groupe> groupes = (List<Groupe>) query.getResultList();
+		
+		request.setAttribute("groupes",groupes);
 		request.setAttribute("type","Créer");
 		request.setAttribute("action","register");
 		session.setAttribute("user_auth", null);
@@ -64,6 +75,7 @@ public class RegisterServlet extends HttpServlet {
 		String confirmMdp = request.getParameter("confirmMdp");
 		String email = request.getParameter("email");
 		String tel = request.getParameter("tel");
+		String idGroupe = request.getParameter("idGroupe");
 		String statut = request.getParameter("statut");
 		
 		System.out.println(login + " / " + mdp + " / " + confirmMdp + " / " + nom + " / " + prenom + " / " + email + " / " + tel);
@@ -91,6 +103,12 @@ public class RegisterServlet extends HttpServlet {
 			request.setAttribute("prenomIncorrect", "Le prénom" + e.getMessage() );
 			error = true;
 		}
+		try {
+			veriftel(tel);
+		} catch (Exception e) {
+			request.setAttribute("telIncorrect", e.getMessage() );
+			error = true;
+		}
 		if(error) {
 			/*----- Recuperation des inputs en cas d'erreur + redirection-----*/
 			request.setAttribute("newNom", nom);
@@ -110,6 +128,8 @@ public class RegisterServlet extends HttpServlet {
 			user.setPrenomUser(prenom);
 			user.setStatut(statut);
 			sessionFact.save(user);
+			Groupe groupe = (Groupe) sessionFact.get(Groupe.class, Integer.parseInt(idGroupe));
+			groupe.addUser(user);
 			tx.commit();
 			/*----- Fermeture connexion + Redirection -----*/
 			sessionFact.close();
@@ -125,12 +145,18 @@ public class RegisterServlet extends HttpServlet {
 		if (s.length() < 2)
 			throw new Exception(" doit comporter au moins deux caracteres");
 		if(!(c >= 'A' && c <= 'Z'))
-			throw new Exception(" chaine doit commencer par une lettre en majuscule");
+			throw new Exception(" doit commencer par une lettre en majuscule");
 		for(int i = 0 ; i< s.length(); i++) {
 			c = s.charAt(i);
 			if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && (c != '-') && !Character.isWhitespace(c))
 				throw new Exception(" ne peut contenir que des lettres, tirés et espaces");
 		}
+		return true;
+	}
+	public boolean veriftel(String s) throws Exception {
+		char c = s.charAt(0);
+		if (s.length() != 10)
+			throw new Exception("Le téléphone doit contenir exactement 10 nombres");
 		return true;
 	}
 }

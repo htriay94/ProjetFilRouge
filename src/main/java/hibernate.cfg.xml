@@ -6,7 +6,7 @@
 	<session-factory>
 		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
 		<property name="hibernate.connection.password">root</property>
-		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/elsilio?serverTimezone=UTC</property>
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/elsilio?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf8</property>
 		<property name="hibernate.connection.username">root</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 		<property name="hbm2ddl.auto">update</property>
@@ -23,6 +23,5 @@
 		<mapping class="org.eclipse.model.UserQcm"/>
 		<mapping class="org.eclipse.model.UserQcmPK"/>
 		<mapping class="org.eclipse.model.Commentaire"/>
-		<mapping class="org.eclipse.model.CommentairePK"/>
 	</session-factory>
 </hibernate-configuration>

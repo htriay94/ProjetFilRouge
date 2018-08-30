@@ -18,6 +18,8 @@ import java.util.Set;
 		@NamedQuery(name="User.findAll", query="SELECT u FROM User u"),
 		@NamedQuery(name="User.findByLoginAndMdp", query="SELECT u FROM User u WHERE u.identifiant = :login AND u.motDePasse = :mdp"),
 		@NamedQuery(name="User.findByEmail", query="SELECT u FROM User u WHERE u.email = :email"),
+		@NamedQuery(name="User.findByGroupe", query="SELECT u FROM User u WHERE u.groupe.idGroupe = :idGroupe"),
+		@NamedQuery(name="User.findByNotGroupe", query="SELECT u FROM User u WHERE u.groupe = null"),
 		@NamedQuery(name="User.findByLogin", query="SELECT u FROM User u WHERE u.identifiant = :login")
 })
 
@@ -46,7 +48,7 @@ public class User implements Serializable {
 	private List<Cours> cours;
 
 	//bi-directional many-to-one association to Evaluation
-	@OneToMany(mappedBy="user")
+	@OneToMany(mappedBy="user",cascade=CascadeType.ALL)
 	private List<Evaluation> evaluations;
 
 	//bi-directional many-to-one association to Groupe
@@ -57,8 +59,9 @@ public class User implements Serializable {
 	@ElementCollection
 	private Set<UserQcm> userQcms = new HashSet<UserQcm>(0);
 	
-	@ElementCollection
-	private Set<Commentaire> commentaires = new HashSet<Commentaire>(0);
+	//bi-directional many-to-one association to Commentaire
+	@OneToMany(mappedBy="user",fetch=FetchType.EAGER,cascade=CascadeType.ALL)
+	private List<Commentaire> commentaires;
 
 	public User() {
 	}
@@ -196,14 +199,12 @@ public class User implements Serializable {
 
 		return userQcm;
 	}
-	
-	//bi-directional many-to-one association to UserQcm
-	@OneToMany(mappedBy = "pk_com.user", cascade = CascadeType.ALL, fetch=FetchType.LAZY) 
-	public Set<Commentaire> getCommentaires() {
+	@Transient
+	public List<Commentaire> getCommentaires() {
 		return this.commentaires;
 	}
-	
-	public void setCommentaires(Set<Commentaire> commentaires) {
+
+	public void setCommentaires(List<Commentaire> commentaires) {
 		this.commentaires = commentaires;
 	}
 

@@ -1,6 +1,7 @@
 package org.eclipse.controller.matiere;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,7 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.model.Cours;
 import org.eclipse.model.Matiere;
+import org.eclipse.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -37,7 +40,7 @@ public class GetListMatieresServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		//HttpSession session = request.getSession();		
+		HttpSession session = request.getSession();		
 		//if(session.getAttribute("connected") != null) {
 			String matieresXML = "<matieres>";
 			String matiereEltXML = "";
@@ -47,13 +50,38 @@ public class GetListMatieresServlet extends HttpServlet {
 			Session sessionFact = sFactory.openSession();
 			
 			/*----- Execution requete pour récupérer le supposé user -----*/
-			Query query = sessionFact.createNamedQuery("Matiere.findAll");
-			List<Matiere> matieres = (List<Matiere>) query.getResultList();
-			
-			for (Matiere matiere : matieres) {
-				System.out.println(matiere);
-				matiereEltXML = "<matiere id=\""+matiere.getIdMatiere()+"\">";
-				matiereEltXML += "<nom>"+matiere.getNomMatiere()+"</nom>";
+			User user_auth = (User) session.getAttribute("user_auth");
+			List<Matiere> matieres = new ArrayList<Matiere>();
+			if(user_auth.getStatut().equals("stagiaire")) {
+				List<Cours> cours = user_auth.getGroupe().getCours();
+				
+				/*----- On veut la liste des matieres de l'utilisateur connecté ----- */
+				for (Cours cour : cours) {
+					Matiere matiere = cour.getMatiere();
+					if(!matieres.contains(matiere)) {
+						matieres.add(matiere);
+						matiereEltXML = "<matiere id=\""+matiere.getIdMatiere()+"\">";
+						matiereEltXML += "<nom>"+matiere.getNomMatiere()+"</nom>";
+						matiereEltXML += "</matiere>";
+						matieresXML += matiereEltXML;
+					}
+				}
+			} else {
+				/*----- Execution requete pour récupérer le supposé user -----*/
+				Query query = sessionFact.createNamedQuery("Matiere.findAll");
+				matieres = (List<Matiere>) query.getResultList();
+				
+				for (Matiere matiere : matieres) {
+					System.out.println(matiere);
+					matiereEltXML = "<matiere id=\""+matiere.getIdMatiere()+"\">";
+					matiereEltXML += "<nom>"+matiere.getNomMatiere()+"</nom>";
+					matiereEltXML += "</matiere>";
+					matieresXML += matiereEltXML;
+				}
+			}
+			if(matieres.isEmpty()) {
+				matiereEltXML = "<matiere id=\"#\">";
+				matiereEltXML += "<nom>Pas de cours</nom>";
 				matiereEltXML += "</matiere>";
 				matieresXML += matiereEltXML;
 			}

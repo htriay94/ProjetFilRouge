@@ -4,6 +4,8 @@
 <jsp:include page="../Template/head.jsp" />
 </head>
 <body id="page-top">
+	<c:set var = "path_uploads" scope = "request" value = "C:/Users/Stagiaire/Documents/JEE/ProjetFilRouge/src/main/webapp/uploads/${ sessionScope.cours.support }"></c:set>
+	<%-- <c:out value = "${ path_uploads }"/> --%>
 	<c:if test="${ !sessionScope.connected }">
 		<c:redirect url="login" />
 	</c:if>
@@ -15,62 +17,82 @@
 
 			<!-- Page Content -->
 			<div class="card mb-3">
-				<div class="card-header">
-					<h3>
-						<i class="fas fa-table"></i> Liste des Cours de
-						<c:out value="${nomMatiere}" />
-						<c:if test="${ sessionScope.user_auth.statut == 'admin' || sessionScope.user_auth.statut == 'formateur' }">
-						<a href="add-cours?idMat=${ idMatiere }&nomMat=${nomMatiere}" class="btn btn-primary" style="float:right;">Créer un cours</a>
-						</c:if>
-					</h3>
-					
-				</div>
-				<div class="card-body">
-					<div class="table-responsive">
-						<table class="table table-bordered" id="dataTable" width="100%"
-							cellspacing="0">
-							<thead class="thead-dark">
-								<tr>
-									<th scope="col">Nom</th>
-									<th scope="col">Date</th>
-									<th scope="col">Support</th>
-									<c:if test="${ sessionScope.user_auth.statut == 'admin' }">
-									<th scope="col">Supprimer</th>										
-									</c:if>
-								</tr>
-							</thead>
-							<tfoot>
-								<tr>
-									<th>Nom</th>
-									<th>Date</th>
-									<th>Support</th>
-								</tr>
-							</tfoot>
-							<tbody>
-								<c:forEach items="${ listeCours }" var="cours"
-									varStatus="status">
-									<tr>
-										<c:if test="${ sessionScope.user_auth.statut == 'admin' }">
-											<td> <a href="edit-cours?idC=${cours.idCours}&idMat=${ idMatiere }&nomMat=${nomMatiere}">${cours.nomCours}</a></td>
-										</c:if>
-										<c:if test="${ !sessionScope.user_auth.statut == 'admin' }">
-										<td>${cours.nomCours}</td>
-										</c:if>
-										<td><fmt:formatDate type="date" dateStyle="short"
-												value="${cours.dateCours}" /></td>
-										<td>${cours.support}</td>
-										<c:if test="${ sessionScope.user_auth.statut == 'admin' }">
-											<td> <a href="remove-cours?idC=${cours.idCours}&idMat=${ idMatiere }&nomMat=${nomMatiere}" class="confirmation"><i class="fa fa-times" aria-hidden="true"></i></a> </td>
-										</c:if>
-									</tr>
-									<br>
-								</c:forEach>
-							</tbody>
-						</table>
+				<div class="card-header"><h3>
+					<i class="fas fa-fw fa-book"></i> 
+					${ sessionScope.cours.matiere.nomMatiere } / ${ sessionScope.cours.nomCours } par ${ sessionScope.cours.user.prenomUser } ${ sessionScope.cours.user.nomUser }
+					<c:if test="${ sessionScope.user_auth.statut == 'admin' || (sessionScope.user_auth.statut == 'formateur' && sessionScope.user_auth.idUser == sessionScope.cours.user.idUser) }">
+					<div style="float:right;">
+						<a href="edit-cours" class="btn btn-primary">Modifier</a>
 					</div>
-				</div>
-				<div class="card-footer small text-muted">Updated now</div>
+					</c:if>
+				</h3></div>
+		        <div class="card-body">
+		        	<%-- <object data="${path_uploads}" type="application/pdf" width="500" height="300"/> --%>
+		          <h3 style="margin:1em;"><a href="display-pdf" target="_blank"> Télécharger le cours <i class="fa fa-download" aria-hidden="true"></i>
+		          </a></h3>
+		          <!-- Section Commentaires -->
+					  <div class="row">
+					    <div class="col-sm-12">
+					        <div class="comment-tabs">
+					            <ul class="nav nav-tabs">
+								  <li class="nav-item">
+								    <a class="nav-link active" href="#comments-logout" role="tab" data-toggle="tab">Commentaires ${ sessionScope.cours.commentaires.size() }</a>
+								  </li>
+								  <li class="nav-item">
+								    <a class="nav-link" href="#add-comment" role="tab" data-toggle="tab">Commenter</a>
+								</ul>           
+					            <div class="tab-content">
+					                <div class="tab-pane active" id="comments-logout">                
+					                    <ul class="media-list">
+					                    <c:forEach items="${ sessionScope.cours.commentaires }" var="commentaire" varStatus="status">
+					                      <li class="media">
+					                        <div class="media-body">
+					                          <div class="well well-lg">
+					                              <h4 class="media-heading reviews"> <c:out value="${ commentaire.user.nomUser } ${ commentaire.user.prenomUser } (${ commentaire.user.identifiant })"></c:out> </h4>
+					                              <hr>
+					                              <ul class="media-date text-uppercase reviews list-inline">
+					                                <li><fmt:formatDate type="date" dateStyle="short" value="${ commentaire.dateCommentaire }" /></li>
+					                              </ul>
+					                              <p class="media-comment">
+					                                <c:out value="${ commentaire.contenuCommentaire }"></c:out>
+					                              </p>
+					                          </div>              
+					                        </div>
+					                      </li>
+					                      </c:forEach>
+					                      <c:if test = "${ empty sessionScope.cours.commentaires }">
+					                       <b>Aucun commentaire</b>
+					                      </c:if>
+					                    </ul> 
+					                </div>
+					                <div class="tab-pane" id="add-comment">
+					                    <form action="add-comment" method="post" class="form-horizontal" id="commentForm" role="form"> 
+					                        <div class="form-group">
+					                            <label for="content" class="col-sm-2 control-label">Comment</label>
+					                            <div class="col-sm-10">
+					                              <textarea class="form-control" name="content" id="content" rows="5"></textarea>
+					                            </div>
+					                        </div>
+					                        <p style="color: red;">${ inputError }</p>
+					                        <p style="color: red;">${ contentIncorrect }</p>
+					                        <div class="form-group">
+					                            <div class="col-sm-offset-2 col-sm-10">                    
+					                                <button class="btn btn-success" type="submit" ><span class="glyphicon glyphicon-send"></span> Commenter</button>
+					                            </div>
+					                        </div>            
+					                    </form>
+					                </div>
+					                
+					            </div>
+					        </div>
+						</div>
+					  </div>
+		          <!-- end Section Commentaires -->
+	            </div>
+            </div>
+	        </div>
 			</div>
+
 
 		</div>
 		<!-- /.container-fluid -->

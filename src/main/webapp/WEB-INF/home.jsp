@@ -9,18 +9,15 @@
 			<jsp:include page="Template/menu.jsp" />
 			
 			<div class="container-fluid">
-
-		         <!-- Breadcrumbs-->
-	          <ol class="breadcrumb">
-	            <li class="breadcrumb-item active">
-	              <a href="home">Home</a>
-	             </li>
-	          </ol>
-	
+			
 	          <!-- Page Content -->
-	          <h1>Bienvenue sur le site du centre de formation Elsilio</h1>
-	          <hr>
-
+	          <div class="container theme-showcase">
+				<hr>
+				<h1 style="text-align: center;">Bienvenue sur le site du centre de formation Elsilio</h1>
+				<div id="holder" class="row"></div>
+				
+			  </div>
+				<hr>
 	        </div>
 	        <!-- /.container-fluid -->
 			

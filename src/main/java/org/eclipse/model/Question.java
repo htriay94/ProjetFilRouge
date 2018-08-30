@@ -30,7 +30,7 @@ public class Question implements Serializable {
 	private Qcm qcm;
 
 	//bi-directional many-to-one association to Reponse
-	@OneToMany(mappedBy="question")
+	@OneToMany(mappedBy="question",cascade=CascadeType.ALL)
 	private List<Reponse> reponses;
 
 	public Question() {

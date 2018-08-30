@@ -1,7 +1,10 @@
 package org.eclipse.controller.cours;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -9,9 +12,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
+import org.eclipse.model.Commentaire;
 import org.eclipse.model.Cours;
 import org.eclipse.model.Matiere;
+import org.eclipse.model.Qcm;
 import org.eclipse.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -24,7 +30,7 @@ import org.hibernate.cfg.Configuration;
 @WebServlet("/remove-cours")
 public class RemoveCoursServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+	private static final String UPLOAD_LOCATION_PROPERTY_KEY="C:/Users/Stagiaire/Documents/JEE/ProjetFilRouge/src/main/webapp/uploads";
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -52,14 +58,35 @@ public class RemoveCoursServlet extends HttpServlet {
     			/*----- Recuperation cours -------*/
     			Cours cours = (Cours) sessionFact.get(Cours.class, Integer.parseInt(request.getParameter("idC")));
     			String nomMat = cours.getMatiere().getNomMatiere();
-    			/*----- Suppression cours -------*/
+    		    File uploads = new File(UPLOAD_LOCATION_PROPERTY_KEY + "/" + cours.getMatiere().getNomMatiere() + "/" + cours.getNomCours());
+    		    File file = new File(uploads, cours.getSupport());
+    		    if(file.delete())
+    		    	System.out.println("File deleted successfully");
+    	        else
+    	        	System.out.println("Failed to delete the file");
+    		    uploads.delete();
+    			
+				/*----- Suppression cours -------*/
+    		    cours.getGroupe().setCours(null);
+    		    cours.getMatiere().removeCour(cours);
+    		    //cours.getQcms().clear();
+    		    //cours.getCommentaires().clear();
+    		    
+    		    for(Commentaire commentaire : cours.getCommentaires() ) {
+    		    	commentaire.setCours(null);
+    		    }
+
+    		    for(Qcm qcm: cours.getQcms()) {
+    		    	qcm.setCours(null);
+    		    }
     			sessionFact.remove(cours);
     			/*----- commit -------*/
     			tx.commit();
     			/*----- Fermeture connexion + Redirection -----*/
     			sessionFact.close();
     			sFactory.close();
-    			response.sendRedirect("cours?id="+request.getParameter("idMat")+"&nom="+nomMat);
+    			session.setAttribute("AlertSuccessMsg", "Cours bien supprimé");
+    			response.sendRedirect("liste-cours?id="+request.getParameter("idMat")+"&nom="+nomMat);
     		} else {
     			session.setAttribute("AlertErrorMsg", "Vous n'êtes pas autorisé(e) à faire cette action !");
     			response.sendRedirect("home");
@@ -71,65 +98,6 @@ public class RemoveCoursServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		Boolean error = false;
-		HttpSession session = request.getSession();
-		/*----- Preparation de la connexion -----*/
-		Configuration configuration = new Configuration().configure();
-		SessionFactory sFactory = configuration.buildSessionFactory();
-		Session sessionFact = sFactory.openSession();
-		Transaction tx = sessionFact.beginTransaction();
 		
-		/*----- Recupération des inputs -----*/
-		String nom = request.getParameter("nom");
-		String support = request.getParameter("support");
-		int id = Integer.parseInt(request.getParameter("id"));
-		
-		System.out.println(nom + " / " + support);
-		
-		/*----- Test confirmité des mots de passe -----*/
-		if(nom==null) {
-			request.setAttribute("inputError", "Veuillez remplir le champs nom");
-			doGet(request, response);
-		} else {
-			/*----- Validation du formulaire -----*/
-			try {
-				verifChaine(nom);
-			} catch (Exception e) {
-				request.setAttribute("nomIncorrect", "Le nom" + e.getMessage() );
-				error = true;
-			} 
-			if(error) {
-				/*----- Recuperation des inputs en cas d'erreur + redirection-----*/
-				request.setAttribute("newNom", nom);
-				System.out.println("Error add cours");
-				doGet(request, response);
-			} else {	
-				Cours cours = new Cours();
-				cours.setNomCours(nom);
-				cours.setDateCours(new Date());
-				Matiere matiere = (Matiere) sessionFact.get(Matiere.class, id);
-				cours.setMatiere(matiere);
-				if(support!=null)
-					cours.setSupport(support);
-				sessionFact.save(cours);
-				tx.commit();
-				session.setAttribute("AlertSuccessMsg", "Cours bien enregistré");
-				response.sendRedirect("cours?id="+id+"&nom="+nom);
-			}
-		}
-	}
-	public boolean verifChaine(String s) throws Exception {
-		char c = s.charAt(0);
-		if (s.length() < 2)
-			throw new Exception(" doit comporter au moins deux caracteres");
-		if(!(c >= 'A' && c <= 'Z'))
-			throw new Exception(" chaine doit commencer par une lettre en majuscule");
-		for(int i = 0 ; i< s.length(); i++) {
-			c = s.charAt(i);
-			if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && (c != '-') && !Character.isWhitespace(c))
-				throw new Exception(" ne peut contenir que des lettres, tirés et espaces");
-		}
-		return true;
 	}
 }

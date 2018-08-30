@@ -23,7 +23,7 @@
 	  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
 	    <span aria-hidden="true">&times;</span>
 	  </button>
-	  <p style="text-align: center;"><c:out value="${ AlertSuccessMsg }"></c:out></p>
+	  <p style="text-align: center;"><c:out escapeXml="false" value="${ AlertSuccessMsg }"></c:out></p>
 	  <% session.removeAttribute("AlertSuccessMsg"); %>
 	</div>
 </c:if>

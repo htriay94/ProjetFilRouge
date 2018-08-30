@@ -28,14 +28,26 @@
 	                	</div>
 	              	</div>
 	            </div>
+	            <c:if test="${ sessionScope.user_auth.statut != 'admin' }">
 	            <div class="form-group">
 	            		<label for="statut">Statut :</label>
 						<select class="form-control" id="statut" name="statut" required="required">
 						      <option>stagiaire</option>
 						      <option>formateur</option>
-						</select>		                
-						
-               	</div>
+						</select>	
+				</div>
+				<c:if test="${ action == 'register' }">
+				<div class="form-group">
+	            	<label for="idGroupe">Groupe</label>
+                  	<select name="idGroupe" class="form-control" id="idGroupe">
+	                  	<c:forEach items="${ groupes }" var="groupe" varStatus="status">
+	                  		<option value="${ groupe.idGroupe }">${ groupe.nomGroupe }</option>
+	                  	</c:forEach>
+                  	</select>
+	            </div>
+	            </c:if>	                
+				</c:if>	
+               	
 	            <div class="form-group">
 	              <div class="form-row">
 	                <div class="col-md-6">
@@ -89,7 +101,7 @@
 	                <label for="tel">Téléphone</label>
 	              </div>
 	            </div>
-	          
+	          	<p style="color: red;">${ telIncorrect }</p>
 		        <p style="color: red;">${ nomIncorrect }</p>
 		        <p style="color: red;">${ prenomIncorrect }</p>
 		        <p style="color: red;">${ mdpError }</p>

@@ -90,8 +90,8 @@ public class LoginServlet extends HttpServlet {
 			System.out.println("login success");
 			session.setAttribute("connected",true);
 			session.setAttribute("user_auth",user);
-			session.setAttribute("AlertSuccessMsg", "Vous vous êtes connecté avec succes !");
-			session.setAttribute("msgMenu", "Bienvenue "+ user.getPrenomUser() + " " + user.getNomUser());
+			session.setAttribute("AlertSuccessMsg", "<p>Bienvenue <b>"+ user.getPrenomUser() +" "+ user.getNomUser()+"</b>!</p><p>Vous vous êtes connecté avec succes !</p>");
+			session.setAttribute("msgMenu", user.getPrenomUser() + " " + user.getNomUser());
 		}
 		/*----- Fermeture connexion + Redirection -----*/
 		sessionFact.close();

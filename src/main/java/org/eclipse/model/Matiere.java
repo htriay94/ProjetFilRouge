@@ -24,7 +24,7 @@ public class Matiere implements Serializable {
 	private String nomMatiere;
 
 	//bi-directional many-to-one association to Cour
-	@OneToMany(mappedBy="matiere")
+	@OneToMany(mappedBy="matiere",cascade=CascadeType.ALL)
 	private List<Cours> cours;
 
 	public Matiere() {

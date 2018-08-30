@@ -2,10 +2,16 @@ package org.eclipse.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.cfg.Configuration;
+
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -16,6 +22,7 @@ import java.util.Set;
 @Table(name="cours")
 @NamedQueries({
 	@NamedQuery(name="Cours.findAll", query="SELECT c FROM Cours c"),
+	@NamedQuery(name="Cours.findAllOrderByDate", query="SELECT c FROM Cours c ORDER BY c.dateCours DESC"),
 	@NamedQuery(name="Cours.findByIdMatiere", query="SELECT c FROM Cours c WHERE c.matiere.idMatiere = :idMatiere ORDER BY c.dateCours DESC")
 })
 public class Cours implements Serializable {
@@ -41,13 +48,20 @@ public class Cours implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="idUser")
 	private User user;
+	
+	//bi-directional many-to-one association to Groupe
+	@ManyToOne
+	@JoinColumn(name="idGroupe")
+	private Groupe groupe;
 
 	//bi-directional many-to-one association to Qcm
 	@OneToMany(mappedBy="cours")
 	private List<Qcm> qcms;
 	
-	@ElementCollection
-	private Set<Commentaire> commentaires = new HashSet<Commentaire>(0);
+	//bi-directional many-to-one association to Commentaire
+	@OneToMany(mappedBy="cours")
+	@LazyCollection(LazyCollectionOption.FALSE)
+	private List<Commentaire> commentaires = new ArrayList<Commentaire>();
 	
 	public Cours() {
 	}
@@ -99,6 +113,14 @@ public class Cours implements Serializable {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	public Groupe getGroupe() {
+		return groupe;
+	}
+
+	public void setGroupe(Groupe groupe) {
+		this.groupe = groupe;
+	}
+
 	@Transient
 	public List<Qcm> getQcms() {
 		return this.qcms;
@@ -122,13 +144,12 @@ public class Cours implements Serializable {
 		return qcm;
 	}
 	
-	//bi-directional many-to-one association to UserQcm
-	@OneToMany(mappedBy = "pk_com.cours", cascade = CascadeType.ALL, fetch=FetchType.LAZY) 
-	public Set<Commentaire> getCommentaires() {
+	@Transient
+	public List<Commentaire> getCommentaires() {
 		return this.commentaires;
 	}
-	
-	public void setCommentaires(Set<Commentaire> commentaires) {
+
+	public void setCommentaires(List<Commentaire> commentaires) {
 		this.commentaires = commentaires;
 	}
 

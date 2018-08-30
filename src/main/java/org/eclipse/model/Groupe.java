@@ -2,6 +2,10 @@ package org.eclipse.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import java.util.List;
 
 
@@ -26,9 +30,15 @@ public class Groupe implements Serializable {
 	private Formation formation;
 
 	//bi-directional many-to-one association to User
-	@OneToMany(mappedBy="groupe")
+	@OneToMany(mappedBy="groupe",cascade=CascadeType.ALL)
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> users;
-
+	
+	//bi-directional many-to-one association to Cour
+	@OneToMany(mappedBy="groupe",cascade = CascadeType.PERSIST)
+	@LazyCollection(LazyCollectionOption.FALSE)
+	private List<Cours> cours;
+	
 	public Groupe() {
 	}
 
@@ -55,7 +65,28 @@ public class Groupe implements Serializable {
 	public void setFormation(Formation formation) {
 		this.formation = formation;
 	}
+	@Transient
+	public List<Cours> getCours() {
+		return this.cours;
+	}
 
+	public void setCours(List<Cours> cours) {
+		this.cours = cours;
+	}
+
+	public Cours addCours(Cours cour) {
+		cour.setGroupe(this);
+		getCours().add(cour);
+		return cour;
+	}
+
+	public Cours removeCours(Cours cour) {
+		cour.setGroupe(null);
+		getCours().remove(cour);
+		return cour;
+	}
+	
+	@Transient
 	public List<User> getUsers() {
 		return this.users;
 	}

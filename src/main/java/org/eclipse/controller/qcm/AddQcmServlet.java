@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 /**
  * Servlet implementation class AddQcmServlet
  */
-@WebServlet("/addQcm")
+@WebServlet("/add-qcm")
 public class AddQcmServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        

@@ -53,17 +53,23 @@
 			<c:if test="${ sessionScope.connected }" >
 				<div class="dropdown-menu dropdown-menu-right"
 					aria-labelledby="userDropdown">
-					<a class="dropdown-item" href="#"><b><c:out value="${ sessionScope.msgMenu }"></c:out></b></a>
+					<a class="dropdown-item" ><b><c:out value="${ sessionScope.msgMenu }"></c:out></b></a>
+					<c:if test="${ !empty sessionScope.user_auth.groupe }" >
+					<a class="dropdown-item" ><c:out value="${ sessionScope.user_auth.groupe.nomGroupe }"></c:out></a>
+					</c:if>
+					<c:if test="${ empty sessionScope.user_auth.groupe }" >
+					<a class="dropdown-item" >Admin</a>
+					</c:if>
 					<div class="dropdown-divider"></div>
-					<a class="dropdown-item" href="edit-user">Settings</a>
+					<a class="dropdown-item" href="edit-user">Modifier profil</a>
 					<div class="dropdown-divider"></div>
-					<a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">Logout</a>
+					<a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">Deconnexion</a>
 				</div>
 			</c:if>	
 			<c:if test="${ !sessionScope.connected }" >
 				<div class="dropdown-menu dropdown-menu-right"
 					aria-labelledby="userDropdown">
-					<a class="dropdown-item" href="login">Login</a>
+					<a class="dropdown-item" href="login">Connexion</a>
 					<div class="dropdown-divider"></div>
 					<a class="dropdown-item" href="register">Créer un compte</a>
 				</div>
